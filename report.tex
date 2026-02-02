@@ -1,0 +1,102 @@
+\documentclass[11pt]{article}
+
+\usepackage[a4paper, left=25mm, right=25mm, top=25mm, bottom=25mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[czech]{babel}
+
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{setspace}
+
+\onehalfspacing
+
+\title{Porovnání klasického SVD a randomizovaného SVD}
+\author{Aruzhan Abilmazhinova \\ ABI0008}
+\date{Numerická lineární algebra 2 (NLA2) \\ Zimní semestr 2025}
+
+\begin{document}
+
+\maketitle
+
+\section{Úvod}
+
+Singulární rozklad matice (Singular Value Decomposition, SVD) patří mezi základní nástroje numerické lineární algebry a nachází široké využití v oblastech, jako je zpracování dat, redukce dimenze, komprese informací nebo řešení úloh nejmenších čtverců.
+
+Klasické algoritmy pro výpočet SVD jsou numericky stabilní a velmi přesné, avšak jejich výpočetní a paměťová náročnost může být problematická při práci s velkými maticemi. V posledních letech se proto objevují randomizované algoritmy, které umožňují aproximovat SVD s výrazně nižší výpočetní složitostí a paměťovými nároky, a to za cenu malé ztráty přesnosti.
+
+Cílem tohoto projektu je porovnat klasický SVD a randomizovaný SVD z hlediska:
+\begin{itemize}
+    \item výpočetního času,
+    \item paměťové náročnosti,
+    \item přesnosti aproximace.
+\end{itemize}
+
+\section{Popis použitých metod}
+
+\subsection{Klasický SVD}
+
+Klasický singulární rozklad matice $A \in \mathbb{R}^{m \times n}$ má tvar
+\[
+A = U \Sigma V^T,
+\]
+kde $U \in \mathbb{R}^{m \times r}$ a $V \in \mathbb{R}^{n \times r}$ jsou ortogonální matice, $\Sigma \in \mathbb{R}^{r \times r}$ je diagonální matice singulárních hodnot a $r = \min(m,n)$.
+
+V projektu je klasický SVD realizován pomocí knihovny \texttt{SciPy}, která využívá efektivní implementace z knihovny LAPACK. Tato metoda poskytuje velmi přesné výsledky, avšak její výpočetní složitost je řádově $\mathcal{O}(mn\min(m,n))$.
+
+\subsection{Randomizovaný SVD}
+
+Randomizovaný SVD je aproximační metoda, která nejprve promítne původní matici do prostoru menší dimenze pomocí náhodné projekce. Následně se SVD počítá pouze na této menší matici.
+
+Základní kroky algoritmu jsou:
+\begin{enumerate}
+    \item náhodná projekce původní matice,
+    \item volitelné power iterace pro zvýšení přesnosti,
+    \item ortogonalizace pomocí QR rozkladu,
+    \item výpočet SVD menší matice,
+    \item zpětná projekce do původního prostoru.
+\end{enumerate}
+
+Tento přístup výrazně snižuje výpočetní i paměťovou náročnost, zejména pokud má matice nízkou efektivní hodnost.
+
+\section{Testovací data}
+
+Testování bylo provedeno na třech typech matic:
+\begin{itemize}
+    \item náhodná hustá matice,
+    \item matice s nízkou hodností (low-rank) s cílovou hodností $k = 20$,
+    \item strukturovaná bloková matice.
+\end{itemize}
+
+Tento výběr umožňuje porovnat chování obou metod na různých typech vstupních dat.
+
+\section{Kritéria hodnocení}
+
+Porovnání metod bylo provedeno podle následujících kritérií:
+\begin{itemize}
+    \item výpočetní čas měřený pomocí \texttt{time.perf\_counter},
+    \item paměťová náročnost měřená knihovnou \texttt{tracemalloc},
+    \item přesnost aproximace vyjádřená relativní chybou ve Frobeniově normě:
+    \[
+    \frac{\lVert A - \tilde{A} \rVert_F}{\lVert A \rVert_F}.
+    \]
+\end{itemize}
+
+\section{Výsledky}
+
+Naměřené výsledky ukazují, že randomizovaný SVD je ve všech testovaných případech výrazně rychlejší než klasický SVD. Paměťová náročnost randomizovaného SVD je podstatně nižší, zejména u větších a strukturovaných matic.
+
+U matic s nízkou hodností byla dosažena velmi dobrá přesnost aproximace a rozdíl oproti klasickému SVD je zanedbatelný. U náhodných hustých matic je chyba mírně vyšší, avšak stále přijatelná vzhledem k výrazné úspoře výpočetního času.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{speed_comparison.png}
+\caption{Srovnání výpočetního času klasického a randomizovaného SVD.}
+\end{figure}
+
+\section{Závěr}
+
+V této práci bylo provedeno srovnání klasického algoritmu SVD a jeho randomizované varianty z hlediska výpočetního času, paměťové náročnosti a přesnosti aproximace. Výsledky potvrzují, že randomizované SVD představuje efektivní alternativu ke klasickému SVD, zejména pro velké a nízko-hodnostní matice, kde je kladen důraz na rychlost a paměťovou úspornost výpočtu.
+
+\end{document}
